@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="Hekucoreapp.Api/Hekucoreapp.Api.csproj" />
+  <Project Path="Hekucoreapp.Application/Hekucoreapp.Application.csproj" />
+  <Project Path="Hekucoreapp.Domain/Hekucoreapp.Domain.csproj" />
+  <Project Path="Hekucoreapp.Infrastructure/Hekucoreapp.Infrastructure.csproj" />
+</Solution>

@@ -1,0 +1,12 @@
+table {
+  width: 100%;
+}
+
+.hint {
+  color: var(--mat-sys-on-surface-variant, gray);
+  font-size: 13px;
+}
+
+.active {
+  color: green;
+}

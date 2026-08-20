@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="UserNotFound" xml:space="preserve">
+    <value>Usuario no encontrado</value>
+  </data>
+  <data name="InvalidCredentials" xml:space="preserve">
+    <value>Credenciales inválidas</value>
+  </data>
+  <data name="PasswordTooShort" xml:space="preserve">
+    <value>La contraseña debe tener al menos {0} caracteres</value>
+  </data>
+  <data name="PasswordRequiresUpper" xml:space="preserve">
+    <value>La contraseña debe tener al menos una letra mayúscula</value>
+  </data>
+  <data name="PasswordRequiresLower" xml:space="preserve">
+    <value>La contraseña debe tener al menos una letra minúscula</value>
+  </data>
+  <data name="PasswordRequiresDigit" xml:space="preserve">
+    <value>La contraseña debe tener al menos un número</value>
+  </data>
+  <data name="PasswordRequiresNonAlphanumeric" xml:space="preserve">
+    <value>La contraseña debe tener al menos un carácter especial</value>
+  </data>
+  <data name="DuplicateEmail" xml:space="preserve">
+    <value>El correo electrónico ya está en uso</value>
+  </data>
+  <data name="DuplicateUserName" xml:space="preserve">
+    <value>El nombre de usuario ya está en uso</value>
+  </data>
+  <data name="InvalidEmail" xml:space="preserve">
+    <value>El correo electrónico no es válido</value>
+  </data>
+  <data name="PersonAlreadyExistsCannotLink" xml:space="preserve">
+    <value>Esta persona ya existe y no se puede vincular. Contacta al administrador.</value>
+  </data>
+  <data name="PersonNotFound" xml:space="preserve">
+    <value>Persona no encontrada</value>
+  </data>
+  <data name="PersonAlreadyLinkedToAnotherAccount" xml:space="preserve">
+    <value>Esta persona ya está vinculada a otra cuenta</value>
+  </data>
+  <data name="JwtKeyNotConfigured" xml:space="preserve">
+    <value>La clave JWT no está configurada</value>
+  </data>
+  <data name="RoleNotFound" xml:space="preserve">
+    <value>Rol no encontrado</value>
+  </data>
+  <data name="RoleAlreadyExists" xml:space="preserve">
+    <value>Ya existe un rol con este nombre</value>
+  </data>
+  <data name="CannotDeleteAdminRole" xml:space="preserve">
+    <value>El rol Admin no se puede eliminar.</value>
+  </data>
+  <data name="GoogleAuthNotConfigured" xml:space="preserve">
+    <value>El inicio de sesión con Google no está configurado en este servidor.</value>
+  </data>
+  <data name="InvalidGoogleToken" xml:space="preserve">
+    <value>Token de inicio de sesión de Google inválido.</value>
+  </data>
+  <data name="GoogleEmailNotVerified" xml:space="preserve">
+    <value>El correo electrónico de tu cuenta de Google no está verificado.</value>
+  </data>
+  <data name="AccountWasDeleted" xml:space="preserve">
+    <value>Esta cuenta fue eliminada y ya no puede iniciar sesión. Contacta a un administrador.</value>
+  </data>
+
+  <data name="EmailWelcomeSubject" xml:space="preserve">
+    <value>Bienvenido a Hekucoreapp</value>
+  </data>
+  <data name="EmailWelcomeTitle" xml:space="preserve">
+    <value>¡Bienvenido a Hekucoreapp, {0}!</value>
+  </data>
+  <data name="EmailWelcomeBody" xml:space="preserve">
+    <value>Tu cuenta ha sido creada exitosamente. Ya puedes iniciar sesión y comenzar a explorar la plataforma.</value>
+  </data>
+
+  <data name="EmailPasswordChangedSubject" xml:space="preserve">
+    <value>Contraseña cambiada</value>
+  </data>
+  <data name="EmailPasswordChangedTitle" xml:space="preserve">
+    <value>Contraseña cambiada</value>
+  </data>
+  <data name="EmailPasswordChangedBody" xml:space="preserve">
+    <value>Hola {0}, tu contraseña acaba de ser cambiada. Si no fuiste tú, por favor contacta a un administrador de inmediato.</value>
+  </data>
+
+  <data name="EmailPasswordResetSubject" xml:space="preserve">
+    <value>Contraseña restablecida</value>
+  </data>
+  <data name="EmailPasswordResetTitle" xml:space="preserve">
+    <value>Contraseña restablecida</value>
+  </data>
+  <data name="EmailPasswordResetBody" xml:space="preserve">
+    <value>Hola {0}, un administrador ha restablecido tu contraseña. Tu contraseña temporal es:</value>
+  </data>
+  <data name="EmailPasswordResetFooter" xml:space="preserve">
+    <value>Deberás cambiar esta contraseña la próxima vez que inicies sesión.</value>
+  </data>
+</root>
