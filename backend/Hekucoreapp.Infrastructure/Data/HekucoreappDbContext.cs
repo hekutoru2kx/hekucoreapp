@@ -49,7 +49,7 @@ public class HekucoreappDbContext : IdentityDbContext<ApplicationUser>
             entity.HasKey(p => p.Id);
             entity.HasIndex(p => new { p.DocumentType, p.DocumentId })
                 .IsUnique()
-                .HasFilter("[document_type] IS NOT NULL AND [document_id] IS NOT NULL");
+                .HasFilter("document_type IS NOT NULL AND document_id IS NOT NULL");
             entity.HasOne(p => p.Country)
                 .WithMany()
                 .HasForeignKey(p => p.CountryId)
@@ -74,7 +74,7 @@ public class HekucoreappDbContext : IdentityDbContext<ApplicationUser>
                 .OnDelete(DeleteBehavior.SetNull);
             entity.HasIndex(u => u.PersonId)
                 .IsUnique()
-                .HasFilter("[person_id] IS NOT NULL");
+                .HasFilter("person_id IS NOT NULL");
         });
 
         // DeletedAccount
@@ -93,7 +93,7 @@ public class HekucoreappDbContext : IdentityDbContext<ApplicationUser>
             entity.HasKey(ur => ur.Id);
             entity.HasIndex(ur => new { ur.UserId, ur.RoleId })
                 .IsUnique()
-                .HasFilter("[revoked_at] IS NULL");
+                .HasFilter("revoked_at IS NULL");
             entity.HasOne<ApplicationUser>()
                 .WithMany()
                 .HasForeignKey(ur => ur.UserId)

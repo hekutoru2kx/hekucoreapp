@@ -29,7 +29,8 @@ builder.Services.AddLocalization();
 
 // Database
 builder.Services.AddDbContext<HekucoreappDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
+        .UseSnakeCaseNamingConvention());
 
 // Identity
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
