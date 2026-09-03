@@ -130,12 +130,20 @@ public class UserManagementRepository : IUserManagementRepository
         };
     }
 
-    public async Task AssignRolesAsync(string userId, IList<string> roles)
+    public async Task AssignRolesAsync(string userId, IList<RoleAssignmentRequest> assignments)
     {
         var user = await _userManager.FindByIdAsync(userId)
             ?? throw new Exception(_localizer["UserNotFound"]);
 
-        await _userRoleRepository.AssignRolesAsync(userId, roles);
+        await _userRoleRepository.AssignRolesAsync(userId, assignments);
+    }
+
+    public async Task<IList<RoleAssignmentResult>> GetRoleAssignmentsAsync(string userId)
+    {
+        _ = await _userManager.FindByIdAsync(userId)
+            ?? throw new Exception(_localizer["UserNotFound"]);
+
+        return await _userRoleRepository.GetRoleAssignmentsAsync(userId);
     }
 
     public async Task<IList<UserRoleHistoryResult>> GetRoleHistoryAsync(string userId) =>

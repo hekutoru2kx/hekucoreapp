@@ -1,12 +1,12 @@
 import { Component, inject, signal, computed, OnInit, ViewChild, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule, MatPaginator, PageEvent } from '@angular/material/paginator';
 import { MatSortModule, MatSort, Sort } from '@angular/material/sort';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatMenuModule } from '@angular/material/menu';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSelectModule } from '@angular/material/select';
@@ -38,7 +38,6 @@ import { RoleHistoryDialog } from '../../../components/role-history-dialog/role-
     MatSortModule,
     MatButtonModule,
     MatIconModule,
-    MatMenuModule,
     MatChipsModule,
     MatTooltipModule,
     MatSelectModule,
@@ -59,6 +58,7 @@ export class UserManagement implements OnInit {
   private transloco = inject(TranslocoService);
   private http = inject(HttpClient);
   private dialog = inject(MatDialog);
+  private router = inject(Router);
 
   users = signal<UserListItem[]>([]);
   totalCount = signal(0);
@@ -283,32 +283,11 @@ export class UserManagement implements OnInit {
     });
   }
 
-  addRole(user: UserListItem, role: string): void {
-    const updatedRoles = [...user.roles, role];
-    this.adminService.assignRoles(user.id, updatedRoles).subscribe({
-      next: () => this.loadUsers(),
-      error: (err) => this.errorMessage.set(err.error || this.transloco.translate('common.saveError'))
-    });
-  }
-
-  removeRole(user: UserListItem, role: string): void {
-    if (role === 'Admin') {
-      const adminCount = this.users().filter(u => u.roles.includes('Admin')).length;
-      if (adminCount <= 1) {
-        this.errorMessage.set(this.transloco.translate('admin.users.cannotRemoveLastAdmin'));
-        return;
-      }
-    }
-
-    const updatedRoles = user.roles.filter(r => r !== role);
-    this.adminService.assignRoles(user.id, updatedRoles).subscribe({
-      next: () => this.loadUsers(),
-      error: (err) => this.errorMessage.set(err.error || this.transloco.translate('common.saveError'))
-    });
-  }
-
-  availableRolesToAdd(user: UserListItem): string[] {
-    return this.availableRoles().filter(r => !user.roles.includes(r));
+  // All role editing — add, remove, and setting a start/expiry window — happens on the dedicated
+  // per-user page. This keeps one code path for the user_roles audit trail instead of a
+  // dateless quick-add here plus a dated editor there.
+  manageRoles(user: UserListItem): void {
+    this.router.navigate(['/admin/users', user.id, 'roles']);
   }
 
   toggleActive(user: UserListItem): void {

@@ -6,6 +6,7 @@ import { Dashboard } from './pages/dashboard/dashboard';
 import { authGuard } from './guards/auth-guard';
 import { claimGuard } from './guards/claim-guard';
 import { UserManagement } from './pages/admin/user-management/user-management';
+import { UserRoleAssignment } from './pages/admin/user-role-assignment/user-role-assignment';
 import { ChangePassword } from './pages/change-password/change-password';
 import { Profile } from './pages/profile/profile';
 import { PersonManagement } from './pages/admin/person-management/person-management';
@@ -18,6 +19,7 @@ export const routes: Routes = [
   { path: 'register', component: Register },
   { path: 'dashboard', component: Dashboard, canActivate: [authGuard] },
   { path: 'admin/users', component: UserManagement, canActivate: [authGuard, claimGuard('UserManagementPermission', 'Read')] },
+  { path: 'admin/users/:id/roles', component: UserRoleAssignment, canActivate: [authGuard, claimGuard('UserManagementPermission', 'Update')] },
   { path: 'change-password', component: ChangePassword, canActivate: [authGuard] } ,
   { path: 'profile', component: Profile, canActivate: [authGuard] },
   { path: 'admin/persons', component: PersonManagement, canActivate: [authGuard, claimGuard('PersonsPermission', 'Read')] },

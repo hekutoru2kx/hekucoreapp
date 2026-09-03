@@ -62,6 +62,26 @@ public class UserManagementController : ControllerBase
         });
     }
 
+    [HttpGet("{id}")]
+    [Authorize(Policy = nameof(UserManagementPermission) + "." + nameof(UserManagementPermission.Read))]
+    public async Task<IActionResult> GetUser(string id)
+    {
+        var user = await _userManagementService.GetUserByIdAsync(id);
+        if (user == null) return NotFound();
+
+        return Ok(new UserListDto
+        {
+            Id = user.Id,
+            UserName = user.UserName,
+            Email = user.Email,
+            Roles = user.Roles,
+            IsActive = user.IsActive,
+            MustChangePassword = user.MustChangePassword,
+            CreatedAt = user.CreatedAt,
+            PersonId = user.PersonId
+        });
+    }
+
     [HttpPost]
     [Authorize(Policy = nameof(UserManagementPermission) + "." + nameof(UserManagementPermission.Create))]
     public async Task<IActionResult> CreateUser(CreateUserDto dto)
@@ -94,13 +114,46 @@ public class UserManagementController : ControllerBase
         }
     }
 
-    [HttpPut("{id}/roles")]
-    [Authorize(Policy = nameof(UserManagementPermission) + "." + nameof(UserManagementPermission.Update))]
-    public async Task<IActionResult> AssignRoles(string id, AssignRolesDto dto)
+    [HttpGet("{id}/roles")]
+    [Authorize(Policy = nameof(UserManagementPermission) + "." + nameof(UserManagementPermission.Read))]
+    public async Task<IActionResult> GetRoleAssignments(string id)
     {
         try
         {
-            await _userManagementService.AssignRolesAsync(id, dto.Roles);
+            var assignments = await _userManagementService.GetRoleAssignmentsAsync(id);
+            return Ok(assignments.Select(a => new
+            {
+                roleName = a.RoleName,
+                startsAt = a.StartsAt,
+                expiresAt = a.ExpiresAt,
+                isPending = a.IsPending,
+                isExpired = a.IsExpired,
+                createdAt = a.CreatedAt,
+                createdByName = a.CreatedByName,
+                updatedAt = a.UpdatedAt,
+                updatedByName = a.UpdatedByName
+            }));
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
+    [HttpPut("{id}/roles")]
+    [Authorize(Policy = nameof(UserManagementPermission) + "." + nameof(UserManagementPermission.Update))]
+    public async Task<IActionResult> AssignRoles(string id, AssignUserRolesDto dto)
+    {
+        try
+        {
+            var assignments = dto.Roles.Select(r => new RoleAssignmentRequest
+            {
+                RoleName = r.RoleName,
+                StartsAt = r.StartsAt,
+                ExpiresAt = r.ExpiresAt
+            }).ToList();
+
+            await _userManagementService.AssignRolesAsync(id, assignments);
             return Ok();
         }
         catch (Exception ex)

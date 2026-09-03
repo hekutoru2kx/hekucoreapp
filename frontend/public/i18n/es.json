@@ -135,7 +135,21 @@
       "roleGrantedBy": "Otorgado por",
       "roleRevokedAt": "Revocado el",
       "roleRevokedBy": "Revocado por",
-      "roleActive": "Activo"
+      "roleActive": "Activo",
+      "manageRoles": "Gestionar roles",
+      "noRolesLeftToAdd": "Este usuario ya tiene todos los roles.",
+      "startsAt": "Comienza el",
+      "expiresAt": "Expira el",
+      "clearDate": "Borrar fecha",
+      "createdBy": "Otorgado por",
+      "updatedAt": "Actualizado el",
+      "updatedBy": "Actualizado por",
+      "undoRemove": "Deshacer eliminación",
+      "status_active": "Activo",
+      "status_pending": "Pendiente",
+      "status_expired": "Expirado",
+      "status_new": "Nuevo",
+      "status_markedForRemoval": "Se eliminará"
     },
     "roles": {
       "title": "Gestión de roles",

@@ -53,6 +53,28 @@ export interface UserRoleHistoryItem {
   revokedBy: string | null;
 }
 
+// A currently-open role assignment as returned by GET users/:id/roles — for editing on the
+// role-assignment page. `isPending`/`isExpired` are derived server-side from the window.
+export interface RoleAssignment {
+  roleName: string;
+  startsAt?: string | null;
+  expiresAt?: string | null;
+  isPending: boolean;
+  isExpired: boolean;
+  createdAt: string;
+  createdByName: string;
+  updatedAt: string;
+  updatedByName: string;
+}
+
+// One desired assignment sent to PUT users/:id/roles. Null dates mean "effective now" /
+// "never expires".
+export interface RoleAssignmentInput {
+  roleName: string;
+  startsAt?: string | null;
+  expiresAt?: string | null;
+}
+
 @Service()
 export class Admin {
   private http = inject(HttpClient);
@@ -78,7 +100,15 @@ export class Admin {
     return this.http.post<CreateUserResponse>(`${this.apiUrl}/users`, data);
   }
 
-  assignRoles(userId: string, roles: string[]): Observable<void> {
+  getUser(userId: string): Observable<UserListItem> {
+    return this.http.get<UserListItem>(`${this.apiUrl}/users/${userId}`);
+  }
+
+  getRoleAssignments(userId: string): Observable<RoleAssignment[]> {
+    return this.http.get<RoleAssignment[]>(`${this.apiUrl}/users/${userId}/roles`);
+  }
+
+  assignRoles(userId: string, roles: RoleAssignmentInput[]): Observable<void> {
     return this.http.put<void>(`${this.apiUrl}/users/${userId}/roles`, { roles });
   }
 

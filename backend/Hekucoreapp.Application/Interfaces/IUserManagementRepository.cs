@@ -7,7 +7,8 @@ public interface IUserManagementRepository
     Task<PagedResult<UserListResult>> GetUsersAsync(UserListQuery query);
     Task<UserListResult?> GetUserByIdAsync(string userId);
     Task<CreateUserResult> CreateUserAsync(CreateUserRequest request);
-    Task AssignRolesAsync(string userId, IList<string> roles);
+    Task AssignRolesAsync(string userId, IList<RoleAssignmentRequest> assignments);
+    Task<IList<RoleAssignmentResult>> GetRoleAssignmentsAsync(string userId);
     Task<IList<UserRoleHistoryResult>> GetRoleHistoryAsync(string userId);
     Task DeactivateUserAsync(string userId);
     Task ActivateUserAsync(string userId);

@@ -23,8 +23,11 @@ public class UserManagementService : IUserManagementService
     public async Task<CreateUserResult> CreateUserAsync(CreateUserRequest request) =>
     await _repository.CreateUserAsync(request);
 
-    public async Task AssignRolesAsync(string userId, IList<string> roles) =>
-        await _repository.AssignRolesAsync(userId, roles);
+    public async Task AssignRolesAsync(string userId, IList<RoleAssignmentRequest> assignments) =>
+        await _repository.AssignRolesAsync(userId, assignments);
+
+    public async Task<IList<RoleAssignmentResult>> GetRoleAssignmentsAsync(string userId) =>
+        await _repository.GetRoleAssignmentsAsync(userId);
 
     public async Task<IList<UserRoleHistoryResult>> GetRoleHistoryAsync(string userId) =>
         await _repository.GetRoleHistoryAsync(userId);
