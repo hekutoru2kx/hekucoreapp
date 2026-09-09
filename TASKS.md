@@ -1,8 +1,17 @@
 # Tasks
 
+Single source of truth for this project's tasks. Structure is shared across the whole
+family (ludemia, hekucoreapp, hekutenantcoreapp, gestamind): **Pending** = queued work,
+**Deferred** = intentionally postponed with a stated trigger, **Done** = shipped.
+
 ## Pending
 
 _Nothing pending._
+
+## Deferred — intentional, revisit on trigger
+
+- [ ] **Reusable sortable data-table for admin pages** — hekucoreapp has the ingredients (`shared/{column-preferences,column-reorder,csv-export}.ts` + `components/column-reorder/`) but no reusable table abstraction, so every admin table (`pages/admin/{subject,person}-management/` are the fullest examples) hand-copies ~150 lines of column-def map + `mat-sort` + `mat-paginator` + column show/hide + drag-reorder + `localStorage` prefs + CSV export. Build an `<app-data-table>` component (or a `DataTableController` composable) taking `{ key, header, sortKey?, cell, exportValue?, hidden? }[]` + a `tableKey`, wiring all of the above and supporting **two data modes** — server-side (page/sort → caller reload) and client-side (`MatTableDataSource`, for embedded tables). Build it here so forks inherit it. Full notes: `d--hekucoreapp` memory `project_reusable_data_table_todo`. _Trigger: next table added here, or the next time this boilerplate is copied in any sibling._
+- [ ] **Signed-license-file tech enforcement for the core** — Héctor decided (2026-09-02) to add software licensing / entitlement enforcement to the hekucoreapp core, postponed until the core has a complete feature set. Technical design is agreed (don't re-litigate): offline signed license file (`{ payload, signature, alg:"RS256", kid }`), private `LicenseGen` CLI holds the RSA-2048 key, in-app verifier ships only the embedded public key; `LicenseClaims` record in Domain, `ILicenseService`/`FileLicenseService` singleton in Infrastructure verifying once at startup; `LicenseEnforcementMiddleware` beside `ActiveUserMiddleware` (402 on Missing/Invalid/Expired, `X-License-Warning` on Grace), module gating via the `PermissionCatalog.Modules` authorization loop, seat check in `UserManagementService`, `GET /api/license` for the frontend; ship disabled/log-only until deliberately flipped on. Full design: `d--hekucoreapp` memory `project_licensing_enforcement_todo`. Legal license model deliberately left open. _Trigger: the core stabilises / a product built on it needs a monetization path._
 
 ## Done
 
