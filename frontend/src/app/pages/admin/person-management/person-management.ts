@@ -2,8 +2,8 @@ import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder } from '@angular/forms';
 import { MatTableModule } from '@angular/material/table';
-import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
-import { MatSortModule, Sort } from '@angular/material/sort';
+import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatSortModule } from '@angular/material/sort';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -16,8 +16,9 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Auth } from '../../../services/auth';
 import { environment } from '../../../../environments/environment';
 import { debounceTime, Subject } from 'rxjs';
-import { PAGINATION } from '../../../constants/pagination';
 import { PersonForm, PersonFormData } from '../../../components/person-form/person-form';
+import { ColumnReorder } from '../../../components/column-reorder/column-reorder';
+import { DataTableController } from '../../../shared/data-table-controller';
 
 export interface PersonItem {
   id: number;
@@ -64,7 +65,8 @@ export interface PagedPersonResult {
     MatTooltipModule,
     MatProgressBarModule,
     TranslocoModule,
-    PersonForm
+    PersonForm,
+    ColumnReorder
   ],
   templateUrl: './person-management.html',
   styleUrl: './person-management.scss',
@@ -79,13 +81,36 @@ export class PersonManagement implements OnInit {
   persons = signal<PersonItem[]>([]);
   totalCount = signal(0);
   loading = signal(false);
-  displayedColumns = ['lastName', 'firstName', 'email', 'document', 'phone', 'location', 'actions'];
 
-  pageSize = PAGINATION.defaultPageSize;
-  pageSizeOptions = PAGINATION.pageSizeOptions;
-  pageIndex = 0;
-  sortActive = 'lastName';
-  sortDirection: 'asc' | 'desc' | '' = 'asc';
+  table = new DataTableController<PersonItem>({
+    tableKey: 'persons',
+    defaultSort: { active: 'lastName', direction: 'asc' },
+    onChange: () => this.loadPersons(),
+    columns: [
+      { key: 'lastName', header: () => this.transloco.translate('persons.lastName'), sortable: true, exportValue: (p) => p.lastName },
+      { key: 'firstName', header: () => this.transloco.translate('persons.firstName'), sortable: true, exportValue: (p) => p.firstName },
+      { key: 'email', header: () => this.transloco.translate('persons.email'), sortable: true, exportValue: (p) => p.email ?? '' },
+      {
+        key: 'document',
+        header: () => this.transloco.translate('persons.document'),
+        exportValue: (p) => p.documentType && p.documentId
+          ? `${this.transloco.translate('persons.docType_' + p.documentType + '_code')}: ${p.documentId}`
+          : '',
+      },
+      {
+        key: 'phone',
+        header: () => this.transloco.translate('persons.phone'),
+        exportValue: (p) => `${p.phone ?? ''}${p.phoneExtension ? ' ext. ' + p.phoneExtension : ''}`,
+      },
+      {
+        key: 'location',
+        header: () => this.transloco.translate('profile.location'),
+        sortable: true,
+        sortKey: 'countryId',
+        exportValue: (p) => [p.countryName, p.stateName, p.cityName].filter(Boolean).join(', '),
+      },
+    ],
+  });
 
   searchControl = this.fb.control('');
   private searchSubject = new Subject<string>();
@@ -95,8 +120,10 @@ export class PersonManagement implements OnInit {
   errorMessage = signal<string | null>(null);
 
   ngOnInit(): void {
+    this.table.restore();
+
     this.searchSubject.pipe(debounceTime(400)).subscribe(() => {
-      this.pageIndex = 0;
+      this.table.pageIndex = 0;
       this.loadPersons();
     });
 
@@ -107,10 +134,10 @@ export class PersonManagement implements OnInit {
   loadPersons(): void {
     this.loading.set(true);
     let params = new HttpParams()
-      .set('page', this.pageIndex + 1)
-      .set('pageSize', this.pageSize)
-      .set('sortBy', this.sortActive)
-      .set('sortDirection', this.sortDirection || 'asc');
+      .set('page', this.table.page)
+      .set('pageSize', this.table.pageSize)
+      .set('sortBy', this.table.sortActive)
+      .set('sortDirection', this.table.sortDirection || 'asc');
 
     if (this.searchControl.value)
       params = params.set('search', this.searchControl.value);
@@ -128,17 +155,8 @@ export class PersonManagement implements OnInit {
     });
   }
 
-  onPageChange(event: PageEvent): void {
-    this.pageIndex = event.pageIndex;
-    this.pageSize = event.pageSize;
-    this.loadPersons();
-  }
-
-  onSortChange(sort: Sort): void {
-    this.sortActive = sort.active;
-    this.sortDirection = sort.direction;
-    this.pageIndex = 0;
-    this.loadPersons();
+  exportPersons(): void {
+    this.table.exportRows('persons.csv', this.persons());
   }
 
   toggleForm(person?: PersonItem): void {
