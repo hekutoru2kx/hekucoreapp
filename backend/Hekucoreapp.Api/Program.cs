@@ -125,6 +125,7 @@ using (var scope = app.Services.CreateScope())
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
     var userRoleRepository = scope.ServiceProvider.GetRequiredService<IUserRoleRepository>();
+    var roleManagementRepository = scope.ServiceProvider.GetRequiredService<IRoleManagementRepository>();
     var db = scope.ServiceProvider.GetRequiredService<HekucoreappDbContext>();
 
     // Ensure the singleton AppSettings row exists before anything reads it.
@@ -132,6 +133,12 @@ using (var scope = app.Services.CreateScope())
 
     if (!await roleManager.RoleExistsAsync("Admin"))
         await roleManager.CreateAsync(new IdentityRole("Admin"));
+
+    // Bring any missing DefaultRoleCatalog role into existence with its catalog claims. Roles
+    // that already exist are left alone — a full reconcile stays behind the admin
+    // restore-defaults endpoint. Without this, catalog roles only ever appear when an admin
+    // presses that button, so granting one on a fresh database throws RoleNotFound.
+    await roleManagementRepository.EnsureDefaultRolesExistAsync();
 
     // Admin always has every registered permission, so it can never lock itself
     // out of a module after that module switches from role checks to policy checks.

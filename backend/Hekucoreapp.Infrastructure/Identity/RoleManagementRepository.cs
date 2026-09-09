@@ -75,6 +75,36 @@ public class RoleManagementRepository : IRoleManagementRepository
             await _roleManager.AddClaimAsync(role, new Claim(claim.Module, claim.Action));
     }
 
+    // Creates any catalog role that doesn't exist yet, seeding it with its catalog claims, and
+    // leaves roles that already exist completely untouched. Called at startup.
+    //
+    // Deliberately NOT RestoreDefaultRolesAsync: that one reconciles fully (removes stray claims),
+    // which is correct for an admin explicitly pressing "restore defaults" but would silently undo
+    // their customisations on every app restart. Seed-on-first-create is the boot-safe half.
+    //
+    // Without this, a catalog role only ever comes into existence when an admin hits the
+    // restore-defaults endpoint by hand — so on a fresh database GrantRoleAsync throws
+    // RoleNotFound for anything that grants a default role.
+    public async Task EnsureDefaultRolesExistAsync()
+    {
+        foreach (var group in DefaultRoleCatalog.Roles.GroupBy(r => r.RoleName))
+        {
+            if (await _roleManager.FindByNameAsync(group.Key) != null) continue;
+
+            var role = new IdentityRole(group.Key);
+            var result = await _roleManager.CreateAsync(role);
+            if (!result.Succeeded)
+                throw new Exception(string.Join(", ", result.Errors.Select(e => e.Description)));
+
+            var desired = group
+                .SelectMany(g => g.Actions.Select(action => (Module: g.Module, Action: action)))
+                .ToHashSet();
+
+            foreach (var (module, action) in desired)
+                await _roleManager.AddClaimAsync(role, new Claim(module, action));
+        }
+    }
+
     public async Task RestoreDefaultRolesAsync()
     {
         // Reconciles fully (adds missing, removes stray) rather than only adding — otherwise
