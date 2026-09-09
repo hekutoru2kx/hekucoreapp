@@ -66,4 +66,8 @@ export class NavBar {
   goToRoles(): void {
     this.router.navigate(['/admin/roles']);
   }
+
+  goToSettings(): void {
+    this.router.navigate(['/admin/settings']);
+  }
 }

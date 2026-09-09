@@ -9,4 +9,8 @@ public class AuthResponseDto
     public bool MustChangePassword { get; set; }
 
     public string PreferredTheme { get; set; } = "azure";
+
+    // True when registration succeeded but the user must confirm their email before logging
+    // in. Token is empty in that case.
+    public bool RequiresEmailConfirmation { get; set; }
 }

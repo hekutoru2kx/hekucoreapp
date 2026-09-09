@@ -52,7 +52,13 @@ export class Register {
     const { userName, email, password } = this.form.value;
 
     this.auth.register(userName!, email!, password!).subscribe({
-      next: () => this.router.navigate(['/']),
+      next: (res) => {
+        if (res.requiresEmailConfirmation) {
+          this.router.navigate(['/confirm-email'], { queryParams: { email } });
+        } else {
+          this.router.navigate(['/']);
+        }
+      },
       error: (err) => {
         if (err.status === 0) {
           this.errorMessage.set(this.transloco.translate('common.networkError'));

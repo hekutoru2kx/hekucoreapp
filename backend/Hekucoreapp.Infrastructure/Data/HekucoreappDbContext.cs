@@ -14,6 +14,7 @@ public class HekucoreappDbContext : IdentityDbContext<ApplicationUser>
     private readonly IHttpContextAccessor _httpContextAccessor;
 
     public DbSet<AppInfo> AppInfos => Set<AppInfo>();
+    public DbSet<AppSettings> AppSettings => Set<AppSettings>();
     public DbSet<Person> Persons => Set<Person>();
     public DbSet<DeletedAccount> DeletedAccounts => Set<DeletedAccount>();
     // Named distinctly from the inherited IdentityDbContext.UserRoles (DbSet<IdentityUserRole<string>>,
@@ -42,6 +43,12 @@ public class HekucoreappDbContext : IdentityDbContext<ApplicationUser>
         // migration and makes any accidental future call to UserManager.AddToRoleAsync/GetRolesAsync
         // fail loudly instead of silently writing to a table the app no longer honors.
         modelBuilder.Ignore<IdentityUserRole<string>>();
+
+        // AppSettings — singleton row (Id = 1), seeded by AppSettingsSeeder.
+        modelBuilder.Entity<AppSettings>(entity =>
+        {
+            entity.HasKey(s => s.Id);
+        });
 
         // Person
         modelBuilder.Entity<Person>(entity =>

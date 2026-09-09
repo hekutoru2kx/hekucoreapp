@@ -2,6 +2,7 @@ using Hekucoreapp.Application.DTOs;
 using Hekucoreapp.Domain.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.Configuration;
 using Hekucoreapp.Domain.Models;
 
 namespace Hekucoreapp.Api.Controllers;
@@ -11,10 +12,12 @@ namespace Hekucoreapp.Api.Controllers;
 public class AuthController : ControllerBase
 {
     private readonly IAuthService _authService;
+    private readonly IConfiguration _configuration;
 
-    public AuthController(IAuthService authService)
+    public AuthController(IAuthService authService, IConfiguration configuration)
     {
         _authService = authService;
+        _configuration = configuration;
     }
 
     [HttpPost("register")]
@@ -27,14 +30,15 @@ public class AuthController : ControllerBase
                 UserName = dto.UserName,
                 Email = dto.Email,
                 Password = dto.Password
-            });
+            }, GetFrontendBaseUrl());
             return Ok(new AuthResponseDto
             {
                 Token = result.Token,
                 Email = result.Email,
                 UserName = result.UserName,
                 MustChangePassword = result.MustChangePassword,
-                PreferredTheme = result.PreferredTheme
+                PreferredTheme = result.PreferredTheme,
+                RequiresEmailConfirmation = result.RequiresEmailConfirmation
             });
         }
         catch (Exception ex)
@@ -85,6 +89,28 @@ public class AuthController : ControllerBase
         }
     }
 
+    [HttpPost("confirm-email")]
+    public async Task<IActionResult> ConfirmEmail(ConfirmEmailDto dto)
+    {
+        try
+        {
+            await _authService.ConfirmEmailAsync(dto.UserId, dto.Token);
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
+    [HttpPost("resend-confirmation")]
+    public async Task<IActionResult> ResendConfirmation(ResendConfirmationDto dto)
+    {
+        // Always 200 — never reveal whether the address is registered or already confirmed.
+        await _authService.ResendConfirmationAsync(dto.Email, GetFrontendBaseUrl());
+        return Ok();
+    }
+
     [HttpPost("assign-role")]
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> AssignRole([FromBody] AssignRoleDto dto)
@@ -98,5 +124,16 @@ public class AuthController : ControllerBase
         {
             return BadRequest(ex.Message);
         }
+    }
+
+    // Where email confirmation links point. Configured App:FrontendBaseUrl wins; otherwise
+    // fall back to this request's own origin, which is correct in production where the SPA is
+    // served from the same host as the API.
+    private string GetFrontendBaseUrl()
+    {
+        var configured = _configuration["App:FrontendBaseUrl"];
+        return !string.IsNullOrWhiteSpace(configured)
+            ? configured
+            : $"{Request.Scheme}://{Request.Host}";
     }
 }

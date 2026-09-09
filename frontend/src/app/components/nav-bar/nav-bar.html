@@ -58,6 +58,12 @@
           <span>{{ 'nav.persons' | transloco }}</span>
         </button>
       }
+      @if (auth.hasClaim('AppSettingsPermission', 'Read')) {
+        <button mat-menu-item (click)="goToSettings()">
+          <mat-icon>settings</mat-icon>
+          <span>{{ 'nav.settings' | transloco }}</span>
+        </button>
+      }
 			<button mat-menu-item (click)="logout()">
 				<mat-icon>logout</mat-icon>
 				<span>{{ 'nav.logout' | transloco }}</span>

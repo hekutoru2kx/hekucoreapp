@@ -55,6 +55,8 @@ builder.Services.AddScoped<IUserManagementRepository, UserManagementRepository>(
 builder.Services.AddScoped<IRoleManagementService, RoleManagementService>();
 builder.Services.AddScoped<IRoleManagementRepository, RoleManagementRepository>();
 builder.Services.AddScoped<IGoogleTokenValidator, GoogleTokenValidator>();
+builder.Services.AddScoped<IAppSettingsService, AppSettingsService>();
+builder.Services.AddScoped<IAppSettingsRepository, AppSettingsRepository>();
 
 //Accessor for HttpContext to get the current user in DbContext
 builder.Services.AddHttpContextAccessor();
@@ -124,6 +126,10 @@ using (var scope = app.Services.CreateScope())
     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
     var userRoleRepository = scope.ServiceProvider.GetRequiredService<IUserRoleRepository>();
     var db = scope.ServiceProvider.GetRequiredService<HekucoreappDbContext>();
+
+    // Ensure the singleton AppSettings row exists before anything reads it.
+    await AppSettingsSeeder.SeedAsync(db);
+
     if (!await roleManager.RoleExistsAsync("Admin"))
         await roleManager.CreateAsync(new IdentityRole("Admin"));
 

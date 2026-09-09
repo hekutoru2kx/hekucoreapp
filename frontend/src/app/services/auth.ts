@@ -11,6 +11,9 @@ export interface AuthResponse {
   userName: string;
   mustChangePassword: boolean;
   preferredTheme: string;
+  // Set by /register when the app requires email confirmation: the account exists but is
+  // not logged in — token is empty and the user must confirm via the emailed link.
+  requiresEmailConfirmation?: boolean;
 }
 
 export interface CurrentUser {
@@ -58,12 +61,23 @@ export class Auth {
 
   register(userName: string, email: string, password: string): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.apiUrl}/register`, { userName, email, password })
-      .pipe(tap(res => this.setSession(res)));
+      .pipe(tap(res => {
+        // When confirmation is required there is no session to start yet.
+        if (!res.requiresEmailConfirmation) this.setSession(res);
+      }));
   }
 
   loginWithGoogle(idToken: string): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.apiUrl}/google`, { idToken })
       .pipe(tap(res => this.setSession(res)));
+  }
+
+  confirmEmail(userId: string, token: string): Observable<void> {
+    return this.http.post<void>(`${this.apiUrl}/confirm-email`, { userId, token });
+  }
+
+  resendConfirmation(email: string): Observable<void> {
+    return this.http.post<void>(`${this.apiUrl}/resend-confirmation`, { email });
   }
 
   logout(): void {
