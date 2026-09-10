@@ -131,6 +131,10 @@ using (var scope = app.Services.CreateScope())
     // Ensure the singleton AppSettings row exists before anything reads it.
     await AppSettingsSeeder.SeedAsync(db);
 
+    // Bulk-load reference geography (countries/states/cities) from the shipped CSVs on a
+    // fresh database. No-ops once each table is populated.
+    await GeographySeeder.SeedAsync(db);
+
     if (!await roleManager.RoleExistsAsync("Admin"))
         await roleManager.CreateAsync(new IdentityRole("Admin"));
 
