@@ -6,7 +6,7 @@ family (ludemia, hekucoreapp, hekutenantcoreapp, gestamind): **Pending** = queue
 
 ## Pending
 
-_Nothing pending._
+- [ ] **Auto-create the bootstrap admin on a fresh/empty database** — provisioning a new DB is currently a two-step manual dance: the intended admin has to self-register through the running app *first*, then the app must be restarted so the `Program.cs` startup block promotes that now-existing user (hekucoreapp → `Admin`; hekutenantcoreapp → `SuperAdmin` + default-tenant membership + tenant-scoped `Admin`). Startup only ever **grants a role to a user that already exists** — it never creates one — so a fresh DB has no first way in, and "I set `BootstrapAdminEmail` but can't log in" is a predictable footgun (hit again in the 2026-09-09 DB-recreation session). Proposal: in the startup scope, when `BootstrapAdminEmail` is set **and `AspNetUsers` is empty** (guard on *empty table*, not merely "no active admin", so it can never fire on an established install), create that user — `EmailConfirmed = true`, `MustChangePassword = true` — then fall through to the existing promotion path in the same pass. Password: prefer a new optional `BootstrapAdminPassword` config key (no secret in logs); otherwise a generated random one logged exactly once at `Warning`. Do hekucoreapp first, then port to hekutenantcoreapp — its startup already slots an existing bootstrap user into the default tenant, so the port is just the create-if-empty block. Full context: `d--hekucoreapp` memory `project_core_db_recreation_2026-09`.
 
 ## Deferred — intentional, revisit on trigger
 
