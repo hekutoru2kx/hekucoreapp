@@ -140,6 +140,46 @@ using (var scope = app.Services.CreateScope())
     // presses that button, so granting one on a fresh database throws RoleNotFound.
     await roleManagementRepository.EnsureDefaultRolesExistAsync();
 
+    var bootstrapEmail = builder.Configuration["BootstrapAdminEmail"];
+
+    // First run against an empty database: create the bootstrap admin account so there is
+    // a first way in. Guarded on AspNetUsers being *entirely empty* — never merely "no
+    // active admin" — so it can never fire on an established install. The break-glass
+    // block below then grants this user the Admin role in the same startup pass.
+    if (!string.IsNullOrEmpty(bootstrapEmail) && !await userManager.Users.AnyAsync())
+    {
+        var configuredPassword = builder.Configuration["BootstrapAdminPassword"];
+        var password = string.IsNullOrEmpty(configuredPassword) ? GenerateBootstrapPassword() : configuredPassword;
+
+        var bootstrapUser = new ApplicationUser
+        {
+            Email = bootstrapEmail,
+            UserName = bootstrapEmail,
+            EmailConfirmed = true,
+            MustChangePassword = true,
+            IsActive = true
+        };
+
+        var createResult = await userManager.CreateAsync(bootstrapUser, password);
+        if (createResult.Succeeded)
+        {
+            if (string.IsNullOrEmpty(configuredPassword))
+                app.Logger.LogWarning(
+                    "Created bootstrap admin {Email} on the empty database. Temporary password: {Password} — sign in and change it now (this is logged only once).",
+                    bootstrapEmail, password);
+            else
+                app.Logger.LogWarning(
+                    "Created bootstrap admin {Email} on the empty database using the configured BootstrapAdminPassword — sign in and change it now.",
+                    bootstrapEmail);
+        }
+        else
+        {
+            app.Logger.LogWarning(
+                "Could not create bootstrap admin {Email}: {Errors}",
+                bootstrapEmail, string.Join(", ", createResult.Errors.Select(e => e.Description)));
+        }
+    }
+
     // Admin always has every registered permission, so it can never lock itself
     // out of a module after that module switches from role checks to policy checks.
     var adminRole = await roleManager.FindByNameAsync("Admin");
@@ -162,7 +202,6 @@ using (var scope = app.Services.CreateScope())
         var hasActiveAdmin = await db.UserRoleAssignments.AnyAsync(ur => ur.RoleId == adminRole.Id && ur.RevokedAt == null);
         if (!hasActiveAdmin)
         {
-            var bootstrapEmail = builder.Configuration["BootstrapAdminEmail"];
             if (!string.IsNullOrEmpty(bootstrapEmail))
             {
                 var bootstrapUser = await userManager.FindByEmailAsync(bootstrapEmail);
@@ -174,3 +213,12 @@ using (var scope = app.Services.CreateScope())
 }
 
 app.Run();
+
+// Random password for a generated bootstrap admin: 20 chars from a CSPRNG over an
+// unambiguous alphabet, plus one of each required class so it always clears the
+// default Identity complexity rules. Only used when BootstrapAdminPassword is unset.
+static string GenerateBootstrapPassword()
+{
+    const string alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789";
+    return System.Security.Cryptography.RandomNumberGenerator.GetString(alphabet, 20) + "Aa1!";
+}
