@@ -134,6 +134,13 @@ app.UseDefaultFiles();
 app.UseStaticFiles();
 app.MapControllers();
 
+// Angular client-side routing: a request for a route like /profile or /admin/roles only exists
+// in the SPA's router, not as a server-side file or endpoint. The initial load (or any in-app
+// navigation) works without this because the SPA's own JS handles it, but a hard refresh or a
+// direct link sends that path straight to the server — which needs to fall back to index.html
+// (rather than 404) so Angular's router boots and takes over from there.
+app.MapFallbackToFile("index.html");
+
 using (var scope = app.Services.CreateScope())
 {
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();

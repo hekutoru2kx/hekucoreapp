@@ -152,7 +152,7 @@ public class UserController : ControllerBase
         if (userId == null) return Unauthorized();
 
         var person = await _userService.GetPersonAsync(userId);
-        if (person == null) return BadRequest(_localizer["PersonNotFound"]);
+        if (person == null) return BadRequest(_localizer["PersonNotFound"].Value);
 
         try
         {
@@ -175,7 +175,7 @@ public class UserController : ControllerBase
         if (userId == null) return Unauthorized();
 
         var person = await _userService.GetPersonAsync(userId);
-        if (person == null) return BadRequest(_localizer["PersonNotFound"]);
+        if (person == null) return BadRequest(_localizer["PersonNotFound"].Value);
 
         await _contentService.DeleteSlotAsync(ContentOwnerTypes.Person, person.Id, ContentSlots.ProfilePicture);
         return Ok();

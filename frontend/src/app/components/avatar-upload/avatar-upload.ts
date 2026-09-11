@@ -45,7 +45,7 @@ export class AvatarUpload {
       },
       error: (err) => {
         this.uploading.set(false);
-        this.errorMessage.set(err.error || this.transloco.translate('avatarUpload.uploadError'));
+        this.errorMessage.set(this.errorText(err, 'avatarUpload.uploadError'));
       }
     });
   }
@@ -62,8 +62,17 @@ export class AvatarUpload {
       },
       error: (err) => {
         this.uploading.set(false);
-        this.errorMessage.set(err.error || this.transloco.translate('avatarUpload.removeError'));
+        this.errorMessage.set(this.errorText(err, 'avatarUpload.removeError'));
       }
     });
+  }
+
+  // err.error is only ever safe to render directly when the server sent a plain string body
+  // (e.g. BadRequest(ex.Message)); anything else — a ProblemDetails object, an accidental
+  // non-string BadRequest payload, a network failure with no body — falls back to a translated
+  // message instead of rendering "[object Object]".
+  private errorText(err: unknown, fallbackKey: string): string {
+    const body = (err as { error?: unknown })?.error;
+    return typeof body === 'string' && body.length > 0 ? body : this.transloco.translate(fallbackKey);
   }
 }
