@@ -9,7 +9,7 @@
 
     <mat-card-content>
       <app-avatar-upload
-        [pictureUrl]="pictureUrl()"
+        [contentId]="profilePictureContentId()"
         path="/user/person/profile-picture"
         (uploaded)="onPictureUploaded($event)"
         (removed)="onPictureRemoved()">

@@ -14,7 +14,6 @@ import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { HttpClient } from '@angular/common/http';
 import { Auth } from '../../services/auth';
 import { Theme } from '../../services/theme';
-import { Content } from '../../services/content';
 import { environment } from '../../../environments/environment';
 import { PersonForm, PersonFormData } from '../../components/person-form/person-form';
 import { AvatarUpload } from '../../components/avatar-upload/avatar-upload';
@@ -74,7 +73,6 @@ export class Profile implements OnInit {
   private router = inject(Router);
   private http = inject(HttpClient);
   private transloco = inject(TranslocoService);
-  protected content = inject(Content);
 
   errorMessage = signal('');
   successMessage = signal('');
@@ -192,11 +190,6 @@ export class Profile implements OnInit {
 
   goToChangePassword(): void {
     this.router.navigate(['/change-password']);
-  }
-
-  pictureUrl(): string | null {
-    const id = this.profilePictureContentId();
-    return id ? this.content.fileUrl(id) : null;
   }
 
   onPictureUploaded(contentId: number): void {

@@ -1,4 +1,4 @@
-import { Component, inject, input, output, signal } from '@angular/core';
+import { Component, DestroyRef, effect, inject, input, output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -11,6 +11,12 @@ import { Content } from '../../services/content';
 // The caller owns which feature's route this talks to (`path`, e.g.
 // '/user/person/profile-picture') and how the resulting picture is displayed; this component
 // only handles picking a file, showing progress/errors, and removal.
+//
+// Takes `contentId`, not a ready-to-bind URL: the download endpoint is authenticated, and a
+// plain <img src> request carries no Authorization header (browsers don't attach one to
+// image/navigation requests, only HttpClient does via the auth interceptor) — it would 401.
+// So this component fetches the image itself through Content.fetchImage (which goes through
+// HttpClient) and binds the resulting blob as an object URL instead.
 @Component({
   selector: 'app-avatar-upload',
   imports: [CommonModule, MatButtonModule, MatIconModule, MatProgressSpinnerModule, TranslocoModule],
@@ -20,8 +26,9 @@ import { Content } from '../../services/content';
 export class AvatarUpload {
   private content = inject(Content);
   private transloco = inject(TranslocoService);
+  private destroyRef = inject(DestroyRef);
 
-  pictureUrl = input<string | null>(null);
+  contentId = input<number | null>(null);
   path = input.required<string>();
 
   uploaded = output<number>();
@@ -29,6 +36,14 @@ export class AvatarUpload {
 
   uploading = signal(false);
   errorMessage = signal<string | null>(null);
+  displayUrl = signal<string | null>(null);
+
+  private currentObjectUrl: string | null = null;
+
+  constructor() {
+    effect(() => this.loadImage(this.contentId()));
+    this.destroyRef.onDestroy(() => this.releaseObjectUrl());
+  }
 
   onFileSelected(event: Event): void {
     const target = event.target as HTMLInputElement;
@@ -65,6 +80,31 @@ export class AvatarUpload {
         this.errorMessage.set(this.errorText(err, 'avatarUpload.removeError'));
       }
     });
+  }
+
+  private loadImage(id: number | null): void {
+    this.releaseObjectUrl();
+
+    if (id == null) {
+      this.displayUrl.set(null);
+      return;
+    }
+
+    this.content.fetchImage(id).subscribe({
+      next: (blob) => {
+        const url = URL.createObjectURL(blob);
+        this.currentObjectUrl = url;
+        this.displayUrl.set(url);
+      },
+      error: () => this.displayUrl.set(null)
+    });
+  }
+
+  private releaseObjectUrl(): void {
+    if (this.currentObjectUrl) {
+      URL.revokeObjectURL(this.currentObjectUrl);
+      this.currentObjectUrl = null;
+    }
   }
 
   // err.error is only ever safe to render directly when the server sent a plain string body

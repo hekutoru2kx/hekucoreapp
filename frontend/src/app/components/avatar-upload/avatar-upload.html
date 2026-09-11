@@ -1,7 +1,7 @@
 <div class="avatar-upload">
   <div class="avatar-preview">
-    @if (pictureUrl()) {
-      <img [src]="pictureUrl()" alt="" />
+    @if (displayUrl()) {
+      <img [src]="displayUrl()" alt="" />
     } @else {
       <mat-icon class="placeholder">account_circle</mat-icon>
     }
@@ -15,7 +15,7 @@
       <mat-icon>photo_camera</mat-icon>
       {{ 'avatarUpload.change' | transloco }}
     </button>
-    @if (pictureUrl()) {
+    @if (contentId()) {
       <button mat-stroked-button type="button" (click)="onRemove()" [disabled]="uploading()">
         <mat-icon>delete</mat-icon>
         {{ 'avatarUpload.remove' | transloco }}

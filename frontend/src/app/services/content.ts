@@ -17,6 +17,14 @@ export class Content {
     return `${environment.apiUrl}/content/${contentId}/file`;
   }
 
+  // The download endpoint requires a bearer token, which only HttpClient (via the auth
+  // interceptor) attaches — a plain <img src="..."> request goes out with no Authorization
+  // header and 401s, and so does opening that URL directly. Callers bind the resulting blob as
+  // an object URL instead (see AvatarUpload) so <img> never talks to the API directly.
+  fetchImage(contentId: number): Observable<Blob> {
+    return this.http.get(this.fileUrl(contentId), { responseType: 'blob' });
+  }
+
   upload(path: string, file: File): Observable<{ id: number }> {
     const formData = new FormData();
     formData.append('file', file);
