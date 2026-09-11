@@ -14,8 +14,10 @@ import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { HttpClient } from '@angular/common/http';
 import { Auth } from '../../services/auth';
 import { Theme } from '../../services/theme';
+import { Content } from '../../services/content';
 import { environment } from '../../../environments/environment';
 import { PersonForm, PersonFormData } from '../../components/person-form/person-form';
+import { AvatarUpload } from '../../components/avatar-upload/avatar-upload';
 
 export interface UserProfile {
   id: string;
@@ -28,6 +30,7 @@ export interface UserProfile {
 
 export interface PersonData {
   id?: number;
+  profilePictureContentId?: number | null;
   firstName?: string;
   lastName?: string;
   birthday?: string;
@@ -58,7 +61,8 @@ export interface PersonData {
     MatDividerModule,
     MatProgressBarModule,
     TranslocoModule,
-    PersonForm
+    PersonForm,
+    AvatarUpload
   ],
   templateUrl: './profile.html',
   styleUrl: './profile.scss',
@@ -70,6 +74,7 @@ export class Profile implements OnInit {
   private router = inject(Router);
   private http = inject(HttpClient);
   private transloco = inject(TranslocoService);
+  protected content = inject(Content);
 
   errorMessage = signal('');
   successMessage = signal('');
@@ -78,6 +83,8 @@ export class Profile implements OnInit {
 
   loadingPerson = signal(false);
   personFormData = signal<PersonFormData | null>(null);
+  hasPerson = signal(false);
+  profilePictureContentId = signal<number | null>(null);
 
   availableLanguages = [
     { code: 'es', label: 'Español' },
@@ -114,6 +121,8 @@ export class Profile implements OnInit {
     this.http.get<PersonData>(`${environment.apiUrl}/user/person`).subscribe({
       next: (person) => {
         if (person) {
+          this.hasPerson.set(true);
+          this.profilePictureContentId.set(person.profilePictureContentId ?? null);
           this.personFormData.set({
             firstName: person.firstName || '',
             lastName: person.lastName || '',
@@ -183,5 +192,18 @@ export class Profile implements OnInit {
 
   goToChangePassword(): void {
     this.router.navigate(['/change-password']);
+  }
+
+  pictureUrl(): string | null {
+    const id = this.profilePictureContentId();
+    return id ? this.content.fileUrl(id) : null;
+  }
+
+  onPictureUploaded(contentId: number): void {
+    this.profilePictureContentId.set(contentId);
+  }
+
+  onPictureRemoved(): void {
+    this.profilePictureContentId.set(null);
   }
 }

@@ -17,6 +17,8 @@ public class HekucoreappDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<AppSettings> AppSettings => Set<AppSettings>();
     public DbSet<Person> Persons => Set<Person>();
     public DbSet<DeletedAccount> DeletedAccounts => Set<DeletedAccount>();
+    public DbSet<ContentItem> ContentItems => Set<ContentItem>();
+    public DbSet<StoredFile> StoredFiles => Set<StoredFile>();
     // Named distinctly from the inherited IdentityDbContext.UserRoles (DbSet<IdentityUserRole<string>>,
     // backing AspNetUserRoles) to avoid silently shadowing it — this is a different table entirely.
     public DbSet<UserRole> UserRoleAssignments => Set<UserRole>();
@@ -44,10 +46,18 @@ public class HekucoreappDbContext : IdentityDbContext<ApplicationUser>
         // fail loudly instead of silently writing to a table the app no longer honors.
         modelBuilder.Ignore<IdentityUserRole<string>>();
 
-        // AppSettings — singleton row (Id = 1), seeded by AppSettingsSeeder.
+        // AppSettings — singleton row (Id = 1), seeded by AppSettingsSeeder. The Content* column
+        // defaults below matter beyond documentation: they're what backfills the row that
+        // already exists on every established install when this migration's AddColumn runs —
+        // without them the ALTER TABLE would fall back to the CLR defaults (0 / ""), which for
+        // ContentAllowedContentTypes means an empty allow-list that rejects every upload.
         modelBuilder.Entity<AppSettings>(entity =>
         {
             entity.HasKey(s => s.Id);
+            entity.Property(s => s.ContentMaxBytes).HasDefaultValue(5 * 1024 * 1024);
+            entity.Property(s => s.ContentAllowedContentTypes).HasDefaultValue("image/jpeg,image/png,image/webp");
+            entity.Property(s => s.ContentMaxImageDimension).HasDefaultValue(2048);
+            entity.Property(s => s.ContentAvatarMaxDimension).HasDefaultValue(512);
         });
 
         // Person
@@ -69,6 +79,34 @@ public class HekucoreappDbContext : IdentityDbContext<ApplicationUser>
                 .WithMany()
                 .HasForeignKey(p => p.CityId)
                 .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        // ContentItem — generic, polymorphic content/attachment item (see the entity's own
+        // comment). OwnerType/OwnerId has no FK (deliberate — any future entity can be an
+        // owner). Restrict on StoredFile so a stray direct delete can't silently orphan the
+        // blob reference; ContentService always deletes the StoredFile row itself.
+        modelBuilder.Entity<ContentItem>(entity =>
+        {
+            entity.HasKey(c => c.Id);
+            entity.Property(c => c.Title).HasMaxLength(200);
+            entity.Property(c => c.Description).HasMaxLength(1000);
+            entity.Property(c => c.Body).HasColumnType("text");
+            entity.Property(c => c.Url).HasMaxLength(2048);
+            entity.HasIndex(c => new { c.OwnerType, c.OwnerId, c.DisplayOrder });
+            entity.HasIndex(c => new { c.OwnerType, c.OwnerId, c.Slot })
+                .IsUnique()
+                .HasFilter("slot IS NOT NULL");
+            entity.HasOne(c => c.StoredFile)
+                .WithMany()
+                .HasForeignKey(c => c.StoredFileId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        // StoredFile — blob metadata only (see the entity's own comment).
+        modelBuilder.Entity<StoredFile>(entity =>
+        {
+            entity.HasKey(f => f.Id);
+            entity.HasIndex(f => f.Sha256);
         });
 
         // ApplicationUser → Person

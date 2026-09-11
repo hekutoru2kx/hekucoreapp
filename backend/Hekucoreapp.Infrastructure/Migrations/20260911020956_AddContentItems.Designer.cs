@@ -3,6 +3,7 @@ using System;
 using Hekucoreapp.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Hekucoreapp.Infrastructure.Migrations
 {
     [DbContext(typeof(HekucoreappDbContext))]
-    partial class HekucoreappDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260911020956_AddContentItems")]
+    partial class AddContentItems
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

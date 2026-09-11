@@ -11,6 +11,8 @@ using System.Text;
 using System.Security.Claims;
 using Hekucoreapp.Infrastructure.Email;
 using Hekucoreapp.Infrastructure.Repositories;
+using Hekucoreapp.Infrastructure.Content;
+using Hekucoreapp.Api.ContentAccess;
 using Hekucoreapp.Domain.Catalogs;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -57,6 +59,18 @@ builder.Services.AddScoped<IRoleManagementRepository, RoleManagementRepository>(
 builder.Services.AddScoped<IGoogleTokenValidator, GoogleTokenValidator>();
 builder.Services.AddScoped<IAppSettingsService, AppSettingsService>();
 builder.Services.AddScoped<IAppSettingsRepository, AppSettingsRepository>();
+
+// Content / attachments — generic polymorphic layer (see TASKS.md / the design doc). Provider
+// defaults to LocalDisk so a fresh clone works with no Azure account; set
+// ContentStorage:Provider = "AzureBlob" + the connection string/container to use a real account.
+builder.Services.AddScoped<IContentService, ContentService>();
+builder.Services.AddScoped<IContentRepository, ContentRepository>();
+builder.Services.AddScoped<IContentPartitionResolver, GlobalContentPartitionResolver>();
+builder.Services.AddScoped<IContentAccessPolicy, PersonContentAccessPolicy>();
+if (string.Equals(builder.Configuration["ContentStorage:Provider"], "AzureBlob", StringComparison.OrdinalIgnoreCase))
+    builder.Services.AddScoped<IContentStorage, AzureBlobContentStorage>();
+else
+    builder.Services.AddScoped<IContentStorage, LocalDiskContentStorage>();
 
 //Accessor for HttpContext to get the current user in DbContext
 builder.Services.AddHttpContextAccessor();

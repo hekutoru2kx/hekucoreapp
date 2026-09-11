@@ -21,4 +21,7 @@ public class PersonDto
     public string? StateName { get; set; }
     public string? CityName { get; set; }
     public string? LinkedUserName { get; set; }
+    // Frontend builds the download URL itself (environment.apiUrl + /content/{id}/file), same
+    // convention as every other API-served resource in this app.
+    public int? ProfilePictureContentId { get; set; }
 }
