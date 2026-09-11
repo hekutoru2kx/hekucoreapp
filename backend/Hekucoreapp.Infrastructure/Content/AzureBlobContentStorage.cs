@@ -11,17 +11,20 @@ namespace Hekucoreapp.Infrastructure.Content;
 public class AzureBlobContentStorage : IContentStorage
 {
     private readonly BlobContainerClient _container;
+    private readonly IContentPartitionResolver _partitionResolver;
 
-    public AzureBlobContentStorage(IConfiguration configuration)
+    public AzureBlobContentStorage(IConfiguration configuration, IContentPartitionResolver partitionResolver)
     {
         var connectionString = configuration["ContentStorage:AzureBlob:ConnectionString"];
         var containerName = configuration["ContentStorage:AzureBlob:Container"] ?? "content";
         var serviceClient = new BlobServiceClient(connectionString);
         _container = serviceClient.GetBlobContainerClient(containerName);
+        _partitionResolver = partitionResolver;
     }
 
-    public async Task<StoredBlobRef> SaveAsync(string partition, Stream content, string fileName, string contentType, CancellationToken ct = default)
+    public async Task<StoredBlobRef> SaveAsync(Stream content, string fileName, string contentType, CancellationToken ct = default)
     {
+        var partition = await _partitionResolver.ResolveAsync(ct);
         var ext = Path.GetExtension(fileName);
         var blobName = $"{partition}/{DateTime.UtcNow:yyyy/MM}/{Guid.NewGuid():N}{ext}";
 

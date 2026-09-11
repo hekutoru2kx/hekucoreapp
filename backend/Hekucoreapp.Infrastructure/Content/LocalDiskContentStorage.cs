@@ -9,17 +9,20 @@ namespace Hekucoreapp.Infrastructure.Content;
 public class LocalDiskContentStorage : IContentStorage
 {
     private readonly string _root;
+    private readonly IContentPartitionResolver _partitionResolver;
 
-    public LocalDiskContentStorage(IConfiguration configuration)
+    public LocalDiskContentStorage(IConfiguration configuration, IContentPartitionResolver partitionResolver)
     {
         var configuredRoot = configuration["ContentStorage:LocalDisk:RootPath"];
         _root = string.IsNullOrWhiteSpace(configuredRoot)
             ? Path.Combine(AppContext.BaseDirectory, "App_Data", "uploads")
             : configuredRoot;
+        _partitionResolver = partitionResolver;
     }
 
-    public async Task<StoredBlobRef> SaveAsync(string partition, Stream content, string fileName, string contentType, CancellationToken ct = default)
+    public async Task<StoredBlobRef> SaveAsync(Stream content, string fileName, string contentType, CancellationToken ct = default)
     {
+        var partition = await _partitionResolver.ResolveAsync(ct);
         var blobName = BuildBlobName(partition, fileName);
         var fullPath = ToFullPath(blobName);
         Directory.CreateDirectory(Path.GetDirectoryName(fullPath)!);

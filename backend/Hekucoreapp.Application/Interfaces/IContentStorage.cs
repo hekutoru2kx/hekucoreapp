@@ -1,11 +1,14 @@
 namespace Hekucoreapp.Application.Interfaces;
 
-// Abstraction over where uploaded bytes physically live. `partition` is the constant "global"
-// in this single-tenant core and a tenant's storage slug in the multi-tenant cores (see
-// IContentPartitionResolver) — kept in the signature so it's identical across the family.
+// Abstraction over where uploaded bytes physically live. Deliberately has no notion of a
+// "partition"/tenant in this signature — ContentService (Application layer) has no clean way to
+// resolve "the current tenant" itself (only Infrastructure can, via the DbContext), so each
+// implementation resolves its own storage partition internally via IContentPartitionResolver
+// (a constant "global" here and in ludemia; the caller's Tenant.StoragePrefix in the
+// multi-tenant cores) instead of taking one as a parameter.
 public interface IContentStorage
 {
-    Task<StoredBlobRef> SaveAsync(string partition, Stream content, string fileName, string contentType, CancellationToken ct = default);
+    Task<StoredBlobRef> SaveAsync(Stream content, string fileName, string contentType, CancellationToken ct = default);
 
     Task<Stream> OpenReadAsync(string container, string blobName, CancellationToken ct = default);
 

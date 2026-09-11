@@ -21,7 +21,6 @@ public class ContentService : IContentService
 
     private readonly IContentRepository _repository;
     private readonly IContentStorage _storage;
-    private readonly IContentPartitionResolver _partitionResolver;
     private readonly IAppSettingsService _appSettingsService;
     private readonly IConfiguration _configuration;
     private readonly IStringLocalizer<Messages> _localizer;
@@ -29,14 +28,12 @@ public class ContentService : IContentService
     public ContentService(
         IContentRepository repository,
         IContentStorage storage,
-        IContentPartitionResolver partitionResolver,
         IAppSettingsService appSettingsService,
         IConfiguration configuration,
         IStringLocalizer<Messages> localizer)
     {
         _repository = repository;
         _storage = storage;
-        _partitionResolver = partitionResolver;
         _appSettingsService = appSettingsService;
         _configuration = configuration;
         _localizer = localizer;
@@ -114,8 +111,7 @@ public class ContentService : IContentService
         var sha256 = Convert.ToHexString(await SHA256.HashDataAsync(processed));
 
         processed.Position = 0;
-        var partition = await _partitionResolver.ResolveAsync(tenantId: null);
-        var blobRef = await _storage.SaveAsync(partition, processed, fileName, contentType);
+        var blobRef = await _storage.SaveAsync(processed, fileName, contentType);
 
         var storedFile = new StoredFile
         {
