@@ -1,5 +1,5 @@
 export const environment = {
   production: true,
   apiUrl: '/api',
-  googleClientId: '336235671253-r4r0dtm9tnnikithsv40jpd4mvebpa38.apps.googleusercontent.com'
+  googleClientId: '336235671253-sjmk2ipptggdrbifhf5i3see56g8l1mr.apps.googleusercontent.com'
 };
