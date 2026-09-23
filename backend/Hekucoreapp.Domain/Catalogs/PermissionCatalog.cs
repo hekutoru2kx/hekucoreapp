@@ -10,5 +10,6 @@ public static class PermissionCatalog
         (nameof(UserManagementPermission), typeof(UserManagementPermission)),
         (nameof(PersonsPermission), typeof(PersonsPermission)),
         (nameof(AppSettingsPermission), typeof(AppSettingsPermission)),
+        (nameof(LoggingSettingsPermission), typeof(LoggingSettingsPermission)),
     ];
 }

@@ -1,4 +1,6 @@
 using Hekucoreapp.Application.DTOs;
+using Hekucoreapp.Application.Interfaces;
+using Hekucoreapp.Domain.Enums;
 using Hekucoreapp.Domain.Enums.Permissions;
 using Hekucoreapp.Domain.Interfaces;
 using Hekucoreapp.Domain.Models;
@@ -13,10 +15,12 @@ namespace Hekucoreapp.Api.Controllers;
 public class AppSettingsController : ControllerBase
 {
     private readonly IAppSettingsService _service;
+    private readonly ICategoryLogger _categoryLogger;
 
-    public AppSettingsController(IAppSettingsService service)
+    public AppSettingsController(IAppSettingsService service, ICategoryLogger categoryLogger)
     {
         _service = service;
+        _categoryLogger = categoryLogger;
     }
 
     [HttpGet]
@@ -52,6 +56,7 @@ public class AppSettingsController : ControllerBase
         }
         catch (Exception ex)
         {
+            _categoryLogger.LogError(LogCategory.Http, $"Unhandled exception in {nameof(AppSettingsController)}", ex);
             return BadRequest(ex.Message);
         }
     }

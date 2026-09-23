@@ -13,6 +13,8 @@ import { PersonManagement } from './pages/admin/person-management/person-managem
 import { RoleManagement } from './pages/admin/role-management/role-management';
 import { AppSettingsPage } from './pages/admin/app-settings/app-settings';
 import { ConfirmEmail } from './pages/user/confirm-email/confirm-email';
+import { LoggingSettingsPage } from './pages/admin/logging-settings/logging-settings';
+import { SystemLogsPage } from './pages/admin/system-logs/system-logs';
 
 
 export const routes: Routes = [
@@ -27,5 +29,7 @@ export const routes: Routes = [
   { path: 'profile', component: Profile, canActivate: [authGuard] },
   { path: 'admin/persons', component: PersonManagement, canActivate: [authGuard, claimGuard('PersonsPermission', 'Read')] },
   { path: 'admin/roles', component: RoleManagement, canActivate: [authGuard, claimGuard('RolesPermission', 'Read')] },
-  { path: 'admin/settings', component: AppSettingsPage, canActivate: [authGuard, claimGuard('AppSettingsPermission', 'Read')] }
+  { path: 'admin/settings', component: AppSettingsPage, canActivate: [authGuard, claimGuard('AppSettingsPermission', 'Read')] },
+  { path: 'admin/logging-settings', component: LoggingSettingsPage, canActivate: [authGuard, claimGuard('LoggingSettingsPermission', 'Read')] },
+  { path: 'admin/logs', component: SystemLogsPage, canActivate: [authGuard, claimGuard('LoggingSettingsPermission', 'Read')] }
 ];

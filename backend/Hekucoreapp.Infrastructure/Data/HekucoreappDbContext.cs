@@ -1,6 +1,9 @@
+using Hekucoreapp.Application.Interfaces;
 using Hekucoreapp.Domain.Common;
 using Hekucoreapp.Domain.Entities;
+using Hekucoreapp.Domain.Enums;
 using Hekucoreapp.Infrastructure.Identity;
+using Hekucoreapp.Infrastructure.Logging;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -12,9 +15,15 @@ namespace Hekucoreapp.Infrastructure.Data;
 public class HekucoreappDbContext : IdentityDbContext<ApplicationUser>
 {
     private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly ICategoryLogger _categoryLogger;
 
     public DbSet<AppInfo> AppInfos => Set<AppInfo>();
     public DbSet<AppSettings> AppSettings => Set<AppSettings>();
+
+    // Six fixed rows (one per LogCategory) plus a singleton retention row, see
+    // LoggingCategorySettings/LoggingRetentionSettings.
+    public DbSet<LoggingCategorySettings> LoggingCategorySettings => Set<LoggingCategorySettings>();
+    public DbSet<LoggingRetentionSettings> LoggingRetentionSettings => Set<LoggingRetentionSettings>();
     public DbSet<Person> Persons => Set<Person>();
     public DbSet<DeletedAccount> DeletedAccounts => Set<DeletedAccount>();
     public DbSet<ContentItem> ContentItems => Set<ContentItem>();
@@ -29,10 +38,11 @@ public class HekucoreappDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<State> States => Set<State>();
     public DbSet<City> Cities => Set<City>();
 
-    public HekucoreappDbContext(DbContextOptions<HekucoreappDbContext> options, IHttpContextAccessor httpContextAccessor)
+    public HekucoreappDbContext(DbContextOptions<HekucoreappDbContext> options, IHttpContextAccessor httpContextAccessor, ICategoryLogger categoryLogger)
         : base(options)
     {
         _httpContextAccessor = httpContextAccessor;
+        _categoryLogger = categoryLogger;
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -58,6 +68,23 @@ public class HekucoreappDbContext : IdentityDbContext<ApplicationUser>
             entity.Property(s => s.ContentAllowedContentTypes).HasDefaultValue("image/jpeg,image/png,image/webp");
             entity.Property(s => s.ContentMaxImageDimension).HasDefaultValue(2048);
             entity.Property(s => s.ContentAvatarMaxDimension).HasDefaultValue(512);
+        });
+
+        // LoggingCategorySettings — six fixed rows (one per LogCategory), seeded by
+        // LoggingSettingsSeeder, never created/deleted through the API.
+        modelBuilder.Entity<LoggingCategorySettings>(entity =>
+        {
+            entity.HasKey(s => s.Id);
+            entity.Property(s => s.Category).HasConversion<string>();
+            entity.Property(s => s.MinimumLevel).HasConversion<string>();
+            entity.HasIndex(s => s.Category).IsUnique();
+        });
+
+        // LoggingRetentionSettings — singleton row (Id = 1), seeded by LoggingSettingsSeeder.
+        modelBuilder.Entity<LoggingRetentionSettings>(entity =>
+        {
+            entity.HasKey(s => s.Id);
+            entity.Property(s => s.RetentionDays).HasDefaultValue(30);
         });
 
         // Person
@@ -191,7 +218,7 @@ public class HekucoreappDbContext : IdentityDbContext<ApplicationUser>
         }
     }
 
-    public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         var currentUserId = _httpContextAccessor.HttpContext?.User
             .FindFirstValue(ClaimTypes.NameIdentifier) ?? "system";
@@ -215,6 +242,19 @@ public class HekucoreappDbContext : IdentityDbContext<ApplicationUser>
             }
         }
 
-        return base.SaveChangesAsync(cancellationToken);
+        // Snapshot before the save — EntityState resets to Unchanged/Detached on success, so
+        // State must be read now; the entries themselves stay valid to read from afterward, which
+        // is when an Added row's real database-generated Id first becomes available.
+        var businessLogSnapshots = ChangeTracker.Entries<AuditableEntity>()
+            .Where(e => e.State is EntityState.Added or EntityState.Modified or EntityState.Deleted)
+            .Select(e => new BusinessLogPlanner.EntrySnapshot(e, e.State, e.Entity.GetType().Name, e.Entity as IAggregateItem))
+            .ToList();
+
+        var result = await base.SaveChangesAsync(cancellationToken);
+
+        foreach (var line in BusinessLogPlanner.Plan(businessLogSnapshots))
+            _categoryLogger.Log(LogCategory.Business, LogLevel.Information, line);
+
+        return result;
     }
 }

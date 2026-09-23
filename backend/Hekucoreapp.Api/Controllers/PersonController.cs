@@ -1,5 +1,7 @@
 using Hekucoreapp.Application.DTOs;
+using Hekucoreapp.Application.Interfaces;
 using Hekucoreapp.Domain.Constants;
+using Hekucoreapp.Domain.Enums;
 using Hekucoreapp.Domain.Enums.Permissions;
 using Hekucoreapp.Domain.Interfaces;
 using Hekucoreapp.Domain.Models;
@@ -15,11 +17,13 @@ public class PersonController : ControllerBase
 {
     private readonly IPersonService _personService;
     private readonly IContentService _contentService;
+    private readonly ICategoryLogger _categoryLogger;
 
-    public PersonController(IPersonService personService, IContentService contentService)
+    public PersonController(IPersonService personService, IContentService contentService, ICategoryLogger categoryLogger)
     {
         _personService = personService;
         _contentService = contentService;
+        _categoryLogger = categoryLogger;
     }
 
     [HttpGet]
@@ -82,6 +86,7 @@ public class PersonController : ControllerBase
         }
         catch (Exception ex)
         {
+            _categoryLogger.LogError(LogCategory.Http, $"Unhandled exception in {nameof(PersonController)}", ex);
             return BadRequest(ex.Message);
         }
     }
@@ -108,6 +113,7 @@ public class PersonController : ControllerBase
         }
         catch (Exception ex)
         {
+            _categoryLogger.LogError(LogCategory.Http, $"Unhandled exception in {nameof(PersonController)}", ex);
             return BadRequest(ex.Message);
         }
     }
@@ -123,6 +129,7 @@ public class PersonController : ControllerBase
         }
         catch (Exception ex)
         {
+            _categoryLogger.LogError(LogCategory.Http, $"Unhandled exception in {nameof(PersonController)}", ex);
             return BadRequest(ex.Message);
         }
     }

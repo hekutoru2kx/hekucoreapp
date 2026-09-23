@@ -2,6 +2,7 @@ using Hekucoreapp.Application.DTOs;
 using Hekucoreapp.Application.Interfaces;
 using Hekucoreapp.Application.Resources;
 using Hekucoreapp.Domain.Constants;
+using Hekucoreapp.Domain.Enums;
 using Hekucoreapp.Domain.Enums.Permissions;
 using Hekucoreapp.Domain.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -21,17 +22,20 @@ public class UserController : ControllerBase
     private readonly IAuthorizationService _authorizationService;
     private readonly IContentService _contentService;
     private readonly IStringLocalizer<Messages> _localizer;
+    private readonly ICategoryLogger _categoryLogger;
 
     public UserController(
         IUserService userService,
         IAuthorizationService authorizationService,
         IContentService contentService,
-        IStringLocalizer<Messages> localizer)
+        IStringLocalizer<Messages> localizer,
+        ICategoryLogger categoryLogger)
     {
         _userService = userService;
         _authorizationService = authorizationService;
         _contentService = contentService;
         _localizer = localizer;
+        _categoryLogger = categoryLogger;
     }
 
     [HttpPut("language")]
@@ -59,6 +63,7 @@ public class UserController : ControllerBase
         }
         catch (Exception ex)
         {
+            _categoryLogger.LogError(LogCategory.Http, $"Unhandled exception in {nameof(UserController)}", ex);
             return BadRequest(ex.Message);
         }
     }
@@ -103,6 +108,7 @@ public class UserController : ControllerBase
         }
         catch (Exception ex)
         {
+            _categoryLogger.LogError(LogCategory.Http, $"Unhandled exception in {nameof(UserController)}", ex);
             return BadRequest(ex.Message);
         }
     }
@@ -163,6 +169,7 @@ public class UserController : ControllerBase
         }
         catch (Exception ex)
         {
+            _categoryLogger.LogError(LogCategory.Http, $"Unhandled exception in {nameof(UserController)}", ex);
             return BadRequest(ex.Message);
         }
     }
@@ -233,6 +240,7 @@ public class UserController : ControllerBase
         }
         catch (Exception ex)
         {
+            _categoryLogger.LogError(LogCategory.Http, $"Unhandled exception in {nameof(UserController)}", ex);
             return BadRequest(ex.Message);
         }
     }

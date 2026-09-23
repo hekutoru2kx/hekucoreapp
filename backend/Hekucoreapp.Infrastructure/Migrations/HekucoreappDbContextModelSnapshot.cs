@@ -357,6 +357,104 @@ namespace Hekucoreapp.Infrastructure.Migrations
                     b.ToTable("deleted_accounts", (string)null);
                 });
 
+            modelBuilder.Entity("Hekucoreapp.Domain.Entities.LoggingCategorySettings", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("category");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("MinimumLevel")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("minimum_level");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("UpdatedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by");
+
+                    b.HasKey("Id")
+                        .HasName("pk_logging_category_settings");
+
+                    b.HasIndex("Category")
+                        .IsUnique()
+                        .HasDatabaseName("ix_logging_category_settings_category");
+
+                    b.HasIndex("CreatedAt")
+                        .HasDatabaseName("ix_logging_category_settings_created_at");
+
+                    b.HasIndex("UpdatedAt")
+                        .HasDatabaseName("ix_logging_category_settings_updated_at");
+
+                    b.ToTable("logging_category_settings", (string)null);
+                });
+
+            modelBuilder.Entity("Hekucoreapp.Domain.Entities.LoggingRetentionSettings", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<int>("RetentionDays")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(30)
+                        .HasColumnName("retention_days");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("UpdatedBy")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by");
+
+                    b.HasKey("Id")
+                        .HasName("pk_logging_retention_settings");
+
+                    b.HasIndex("CreatedAt")
+                        .HasDatabaseName("ix_logging_retention_settings_created_at");
+
+                    b.HasIndex("UpdatedAt")
+                        .HasDatabaseName("ix_logging_retention_settings_updated_at");
+
+                    b.ToTable("logging_retention_settings", (string)null);
+                });
+
             modelBuilder.Entity("Hekucoreapp.Domain.Entities.Person", b =>
                 {
                     b.Property<int>("Id")

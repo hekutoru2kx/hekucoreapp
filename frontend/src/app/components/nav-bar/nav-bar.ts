@@ -70,4 +70,12 @@ export class NavBar {
   goToSettings(): void {
     this.router.navigate(['/admin/settings']);
   }
+
+  goToLoggingSettings(): void {
+    this.router.navigate(['/admin/logging-settings']);
+  }
+
+  goToLogs(): void {
+    this.router.navigate(['/admin/logs']);
+  }
 }

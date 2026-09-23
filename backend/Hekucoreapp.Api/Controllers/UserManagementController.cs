@@ -1,4 +1,6 @@
 using Hekucoreapp.Application.DTOs;
+using Hekucoreapp.Application.Interfaces;
+using Hekucoreapp.Domain.Enums;
 using Hekucoreapp.Domain.Enums.Permissions;
 using Hekucoreapp.Domain.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -13,10 +15,12 @@ namespace Hekucoreapp.Api.Controllers;
 public class UserManagementController : ControllerBase
 {
     private readonly IUserManagementService _userManagementService;
+    private readonly ICategoryLogger _categoryLogger;
 
-    public UserManagementController(IUserManagementService userManagementService)
+    public UserManagementController(IUserManagementService userManagementService, ICategoryLogger categoryLogger)
     {
         _userManagementService = userManagementService;
+        _categoryLogger = categoryLogger;
     }
 
     [HttpGet]
@@ -110,6 +114,7 @@ public class UserManagementController : ControllerBase
         }
         catch (Exception ex)
         {
+            _categoryLogger.LogError(LogCategory.Http, $"Unhandled exception in {nameof(UserManagementController)}", ex);
             return BadRequest(ex.Message);
         }
     }
@@ -136,6 +141,7 @@ public class UserManagementController : ControllerBase
         }
         catch (Exception ex)
         {
+            _categoryLogger.LogError(LogCategory.Http, $"Unhandled exception in {nameof(UserManagementController)}", ex);
             return BadRequest(ex.Message);
         }
     }
@@ -158,6 +164,7 @@ public class UserManagementController : ControllerBase
         }
         catch (Exception ex)
         {
+            _categoryLogger.LogError(LogCategory.Http, $"Unhandled exception in {nameof(UserManagementController)}", ex);
             return BadRequest(ex.Message);
         }
     }
@@ -188,6 +195,7 @@ public class UserManagementController : ControllerBase
         }
         catch (Exception ex)
         {
+            _categoryLogger.LogError(LogCategory.Http, $"Unhandled exception in {nameof(UserManagementController)}", ex);
             return BadRequest(ex.Message);
         }
     }
@@ -203,6 +211,7 @@ public class UserManagementController : ControllerBase
         }
         catch (Exception ex)
         {
+            _categoryLogger.LogError(LogCategory.Http, $"Unhandled exception in {nameof(UserManagementController)}", ex);
             return BadRequest(ex.Message);
         }
     }
@@ -222,6 +231,7 @@ public class UserManagementController : ControllerBase
         }
         catch (Exception ex)
         {
+            _categoryLogger.LogError(LogCategory.Http, $"Unhandled exception in {nameof(UserManagementController)}", ex);
             return BadRequest(ex.Message);
         }
     }
@@ -237,6 +247,7 @@ public class UserManagementController : ControllerBase
         }
         catch (Exception ex)
         {
+            _categoryLogger.LogError(LogCategory.Http, $"Unhandled exception in {nameof(UserManagementController)}", ex);
             return BadRequest(ex.Message);
         }
     }
@@ -262,6 +273,7 @@ public class UserManagementController : ControllerBase
         }
         catch (Exception ex)
         {
+            _categoryLogger.LogError(LogCategory.Http, $"Unhandled exception in {nameof(UserManagementController)}", ex);
             return BadRequest(ex.Message);
         }
     }
@@ -277,6 +289,7 @@ public class UserManagementController : ControllerBase
         }
         catch (Exception ex)
         {
+            _categoryLogger.LogError(LogCategory.Http, $"Unhandled exception in {nameof(UserManagementController)}", ex);
             return BadRequest(ex.Message);
         }
     }

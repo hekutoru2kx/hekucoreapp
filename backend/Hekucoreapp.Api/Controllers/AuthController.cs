@@ -1,4 +1,6 @@
 using Hekucoreapp.Application.DTOs;
+using Hekucoreapp.Application.Interfaces;
+using Hekucoreapp.Domain.Enums;
 using Hekucoreapp.Domain.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
@@ -13,11 +15,13 @@ public class AuthController : ControllerBase
 {
     private readonly IAuthService _authService;
     private readonly IConfiguration _configuration;
+    private readonly ICategoryLogger _categoryLogger;
 
-    public AuthController(IAuthService authService, IConfiguration configuration)
+    public AuthController(IAuthService authService, IConfiguration configuration, ICategoryLogger categoryLogger)
     {
         _authService = authService;
         _configuration = configuration;
+        _categoryLogger = categoryLogger;
     }
 
     [HttpPost("register")]
@@ -43,6 +47,7 @@ public class AuthController : ControllerBase
         }
         catch (Exception ex)
         {
+            _categoryLogger.LogError(LogCategory.Http, $"Unhandled exception in {nameof(AuthController)}", ex);
             return BadRequest(ex.Message);
         }
     }
@@ -64,6 +69,7 @@ public class AuthController : ControllerBase
         }
         catch (Exception ex)
         {
+            _categoryLogger.LogError(LogCategory.Http, $"Unhandled exception in {nameof(AuthController)}", ex);
             return BadRequest(ex.Message);
         }
     }
@@ -85,6 +91,7 @@ public class AuthController : ControllerBase
         }
         catch (Exception ex)
         {
+            _categoryLogger.LogError(LogCategory.Http, $"Unhandled exception in {nameof(AuthController)}", ex);
             return BadRequest(ex.Message);
         }
     }
@@ -99,6 +106,7 @@ public class AuthController : ControllerBase
         }
         catch (Exception ex)
         {
+            _categoryLogger.LogError(LogCategory.Http, $"Unhandled exception in {nameof(AuthController)}", ex);
             return BadRequest(ex.Message);
         }
     }
@@ -122,6 +130,7 @@ public class AuthController : ControllerBase
         }
         catch (Exception ex)
         {
+            _categoryLogger.LogError(LogCategory.Http, $"Unhandled exception in {nameof(AuthController)}", ex);
             return BadRequest(ex.Message);
         }
     }

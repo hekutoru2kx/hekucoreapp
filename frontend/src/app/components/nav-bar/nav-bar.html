@@ -64,6 +64,16 @@
           <span>{{ 'nav.settings' | transloco }}</span>
         </button>
       }
+      @if (auth.hasClaim('LoggingSettingsPermission', 'Read')) {
+        <button mat-menu-item (click)="goToLoggingSettings()">
+          <mat-icon>tune</mat-icon>
+          <span>{{ 'nav.loggingSettings' | transloco }}</span>
+        </button>
+        <button mat-menu-item (click)="goToLogs()">
+          <mat-icon>receipt_long</mat-icon>
+          <span>{{ 'nav.systemLogs' | transloco }}</span>
+        </button>
+      }
 			<button mat-menu-item (click)="logout()">
 				<mat-icon>logout</mat-icon>
 				<span>{{ 'nav.logout' | transloco }}</span>

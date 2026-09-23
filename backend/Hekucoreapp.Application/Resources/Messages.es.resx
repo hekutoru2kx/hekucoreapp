@@ -133,4 +133,7 @@
   <data name="ContentFileTypeNotAllowed" xml:space="preserve">
     <value>Este tipo de archivo no está permitido</value>
   </data>
+  <data name="LoggingSettingsNotFound" xml:space="preserve">
+    <value>Configuración de registro no encontrada</value>
+  </data>
 </root>
