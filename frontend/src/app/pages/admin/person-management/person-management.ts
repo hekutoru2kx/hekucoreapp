@@ -20,6 +20,7 @@ import { PersonForm, PersonFormData } from '../../../components/person-form/pers
 import { ColumnReorder } from '../../../components/column-reorder/column-reorder';
 import { DataTableController } from '../../../shared/data-table-controller';
 import { AvatarUpload } from '../../../components/avatar-upload/avatar-upload';
+import { toYmd } from '../../../shared/datetime-split';
 import { ContentThumbnail } from '../../../components/content-thumbnail/content-thumbnail';
 
 export interface PersonItem {
@@ -174,9 +175,10 @@ export class PersonManagement implements OnInit {
 
   onPersonSaved(data: PersonFormData): void {
     const editing = this.editingPerson();
+    const payload = { ...data, birthday: toYmd(data.birthday) };
     const request = editing
-      ? this.http.put(`${environment.apiUrl}/person/${editing.id}`, data)
-      : this.http.post(`${environment.apiUrl}/person`, data);
+      ? this.http.put(`${environment.apiUrl}/person/${editing.id}`, payload)
+      : this.http.post(`${environment.apiUrl}/person`, payload);
 
     request.subscribe({
       next: () => {
